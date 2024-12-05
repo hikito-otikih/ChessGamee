@@ -72,14 +72,22 @@ public:
 				board.makeMove(move);
 				int eval = minimax(depth - 1, alpha, beta, 0);
 				board.unmakeMove(move);
-				if (val < eval)
+				if(depth==MAXDEPTH)
 				{
-					val = eval;
+					if(val<eval)
+					{
+						val = eval;  
+						bestmove = move ; 
+					}
+					else if(val==eval)
+					{
+						if(rand()%4==0)
+						{
+							bestmove = move ; 
+						}
+					}
 				}
-				if (val == eval && depth == MAXDEPTH)
-				{
-					bestmove = move;
-				}
+				else if(val<eval)val=eval; 
 				if (alpha < eval)alpha = eval;
 				if (beta < alpha)
 				{
@@ -96,14 +104,22 @@ public:
 				board.makeMove(move);
 				int eval = minimax(depth - 1, alpha, beta, 1);
 				board.unmakeMove(move);
-				if (val > eval)
+				if(depth==MAXDEPTH)
 				{
-					val = eval;
+					if(val>eval)
+					{
+						val=eval;  
+						bestmove = move ; 
+					}
+					else if(val==eval)
+					{
+						if(rand()%4==0)
+						{
+							bestmove = move ; 
+						}
+					}
 				}
-				if (val == eval && depth == MAXDEPTH)
-				{
-					bestmove = move;
-				}
+				else if(val>eval)val=eval; 
 				if (beta > eval)beta = eval;
 				if (beta < alpha)
 				{

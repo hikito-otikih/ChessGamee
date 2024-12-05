@@ -55,6 +55,7 @@ private:
 	sf::Font mFont;
 	Bot bot;
 	bool promotionFlag;
+	sf::Vector2i pre1, pre2;
 };
 
 #endif // BOOK_CHESSGAME1PLAYERSTATE_HPP

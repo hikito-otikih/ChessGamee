@@ -31,6 +31,7 @@ namespace States
 		NewGame,
 		ChooseLevel,
 		Loadgame,
+		Savegame,
 	};
 }
 

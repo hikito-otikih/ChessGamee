@@ -50,6 +50,7 @@ private:
 	Player& mPlayer;
 	std::vector<sf::Text> texts;
 	sf::Font mFont;
+	sf::Vector2i pre1, pre2;
 
 };
 
