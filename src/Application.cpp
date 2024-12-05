@@ -26,6 +26,7 @@
 #include <Book/ChooseLevel.hpp>
 #include <Book/Loadgame.hpp>
 #include <Book/SettingOnlyAudio.hpp>
+#include <Book/SaveGameState.hpp>
 
 const sf::Time Application::TimePerFrame = sf::seconds(1.f/60.f);
 
@@ -171,4 +172,5 @@ void Application::registerStates()
 	mStateStack.registerState<ChooseLevel>(States::ChooseLevel);
 	mStateStack.registerState<Loadgame>(States::Loadgame);
 	mStateStack.registerState<SettingOnlyAudio>(States::SettingOnlyAudio);
+	mStateStack.registerState<SaveGameState>(States::Savegame);
 }

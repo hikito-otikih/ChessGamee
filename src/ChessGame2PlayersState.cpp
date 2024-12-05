@@ -47,25 +47,28 @@ ChessGame2PlayersState::ChessGame2PlayersState(StateStack& stack, Context contex
 	saveGame->setText("Save game");
 	saveGame->setCallback([this]()
 		{
-			nlohmann::json JSON;
-			JSON["piecesType"] = mPlayer.piecesType;
-			JSON["boardType"] = mPlayer.boardType;
-			JSON["team"] = mPlayer.team;
-			JSON["RealTeam"] = mPlayer.RealTEAM;
-			JSON["level"] = mPlayer.level;
-			JSON["mode"] = mPlayer.mode;
-			JSON["Board"] = board.getFen();
-			JSON["Turn"] = turn;
-			///
-			std::time_t now = std::time(nullptr);
-			std::stringstream ss;
-			ss << "Game_State_" << now << ".json";
-			std::ofstream fout(ss.str());
-			///
-			fout << JSON.dump(4);
-			fout.close();
-			requestStackPop();
-			requestStackPush(States::Title);
+			// nlohmann::json JSON;
+			// JSON["piecesType"] = mPlayer.piecesType;
+			// JSON["boardType"] = mPlayer.boardType;
+			// JSON["team"] = mPlayer.team;
+			// JSON["RealTeam"] = mPlayer.RealTEAM;
+			// JSON["level"] = mPlayer.level;
+			// JSON["mode"] = mPlayer.mode;
+			// JSON["Board"] = board.getFen();
+			// JSON["Turn"] = turn;
+			// ///
+			// std::time_t now = std::time(nullptr);
+			// std::stringstream ss;
+			// ss << "Game_State_" << now << ".json";
+			// std::ofstream fout(ss.str());
+			// ///
+			// fout << JSON.dump(4);
+			// fout.close();
+			// requestStackPop();
+			// requestStackPush(States::Title);
+			mPlayer.fenCode = board.getFen();
+			mPlayer.turn = turn;
+			requestStackPush(States::Savegame);
 		});
 	mGUIContainer.pack(undoButton);
 	mGUIContainer.pack(redoButton);
@@ -114,6 +117,8 @@ ChessGame2PlayersState::ChessGame2PlayersState(StateStack& stack, Context contex
 	curOffset = 0;
 	resetCurOffset = 0;
 	texts.clear();
+	pre1 = sf::Vector2i(8, 8);
+	pre2 = sf::Vector2i(8, 8);
 }
 
 #include <iostream>
@@ -363,16 +368,31 @@ void ChessGame2PlayersState::draw()
 			sf::RectangleShape Square(sf::Vector2f(80, 80));
 			Square.setPosition((move.second + 1) * 80 + 5 * move.second, (move.first + 1) * 80 + 5 * move.first);
 			Square.setFillColor(sf::Color(0, 0, 0, 100));
-			Square.setOutlineColor(sf::Color::Red);
+			Square.setOutlineColor(sf::Color::Yellow);
 			Square.setOutlineThickness(5);
 			window.draw(Square);
 		}
 		sf::RectangleShape Square(sf::Vector2f(80, 80));
 		Square.setPosition((selectedPiece.y + 1) * 80 + 5 * selectedPiece.y, (selectedPiece.x + 1) * 80 + 5 * selectedPiece.x);
 		Square.setFillColor(sf::Color(0, 0, 0, 100));
-		Square.setOutlineColor(sf::Color::Magenta);
+		Square.setOutlineColor(sf::Color::White);
 		Square.setOutlineThickness(5);
 		window.draw(Square);
+	}
+	if (pre1 != sf::Vector2i(8, 8))
+	{
+		sf::RectangleShape Square(sf::Vector2f(80, 80));
+		Square.setPosition((pre1.y + 1) * 80 + 5 * pre1.y, (pre1.x + 1) * 80 + 5 * pre1.x);
+		Square.setFillColor(sf::Color(0, 0, 0, 100));
+		Square.setOutlineColor(sf::Color(255,94,0));
+		Square.setOutlineThickness(5);
+		window.draw(Square);
+		sf::RectangleShape Square2(sf::Vector2f(80, 80));
+		Square2.setPosition((pre2.y + 1) * 80 + 5 * pre2.y, (pre2.x + 1) * 80 + 5 * pre2.x);
+		Square2.setFillColor(sf::Color(0, 0, 0, 100));
+		Square2.setOutlineColor(sf::Color(255,94,0));
+		Square2.setOutlineThickness(5);
+		window.draw(Square2);
 	}
 	std::cerr << "break point 8\n";
 	for (int i = 0; i < 16; i++)
@@ -522,6 +542,10 @@ bool ChessGame2PlayersState::update(sf::Time dt)
 		addLegalMoves();
 		turn = 0;
 		mPlayer.Reset = 0;
+		selectedPiece = sf::Vector2i(8, 8);
+		selected = false;
+		pre1 = sf::Vector2i(8, 8);
+		pre2 = sf::Vector2i(8, 8);
 	}
 	if (mPlayer.Undo == 1)
 	{
@@ -537,6 +561,10 @@ bool ChessGame2PlayersState::update(sf::Time dt)
 			addLegalMoves();
 		}
 		mPlayer.Undo = 0;
+		selectedPiece = sf::Vector2i(8, 8);
+		selected = false;
+		pre1 = sf::Vector2i(8, 8);
+		pre2 = sf::Vector2i(8, 8);
 	}
 	if (mPlayer.Redo == 1)
 	{
@@ -552,6 +580,10 @@ bool ChessGame2PlayersState::update(sf::Time dt)
 			addLegalMoves();
 		}
 		mPlayer.Redo = 0;
+		selectedPiece = sf::Vector2i(8, 8);
+		selected = false;
+		pre1 = sf::Vector2i(8, 8);
+		pre2 = sf::Vector2i(8, 8);
 	}
 
 	std::cerr << "updated\n";
@@ -566,6 +598,8 @@ void ChessGame2PlayersState::MAKEMOVE(int i, int j)
 	mPieces[i][j] = std::move(mPieces[selectedPiece.x][selectedPiece.y]);
 	mPieces[selectedPiece.x][selectedPiece.y] = nullptr;
 	newPos = newPosition(selectedPiece.x, selectedPiece.y) + newPosition(i, j);
+	pre1 = selectedPiece;
+	pre2 = sf::Vector2i(i, j);
 	int makeSomeNoise = 1;
 	if (board.isCapture(chess::uci::uciToMove(board, newPos))) makeSomeNoise = 2;
 	
@@ -689,6 +723,10 @@ bool ChessGame2PlayersState::handleEvent(const sf::Event& event)
 			if (mousePos.x >= 770 && mousePos.x <= 830 && mousePos.y >= 570 && mousePos.y <= 630)
 			{
 				mPlayer.team = 1 - mPlayer.team;
+				selectedPiece = sf::Vector2i(8, 8);
+				selected = false;
+				pre1 = sf::Vector2i(8, 8);
+				pre2 = sf::Vector2i(8, 8);
 				newBoard();
 				addLegalMoves();
 			}

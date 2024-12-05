@@ -27,16 +27,16 @@ std::vector<std::string> getFilesInDirectory(const std::string& directory)
 	return files;
 }
 
-std::tm stringToDate(const std::string& date_str) {
-	std::string str = "";
-	for (int i = 11; i < date_str.size(); i++)
-		if (date_str[i] == '.') break;
-		else str += date_str[i];
+// std::tm stringToDate(const std::string& date_str) {
+// 	std::string str = "";
+// 	for (int i = 11; i < date_str.size(); i++)
+// 		if (date_str[i] == '.') break;
+// 		else str += date_str[i];
 
-	std::time_t epoch_time = std::stoll(str);
-	std::tm* TM = std::localtime(&epoch_time);
-	return *TM;
-}
+// 	std::time_t epoch_time = std::stoll(str);
+// 	std::tm* TM = std::localtime(&epoch_time);
+// 	return *TM;
+// }
 
 /*
 		"Game at " + toString(1900 + dates[i].tm_year) + " - "
@@ -61,19 +61,14 @@ Loadgame::Loadgame(StateStack& stack, Context context)
 	buttons.clear();
 	curOffset = 0;
 	files = getFilesInDirectory(".");
-	for (const auto& file : files)
-		dates.push_back(stringToDate(file));
+	// for (const auto& file : files)
+	// 	dates.push_back(stringToDate(file));
 	for (int i = 0; i < (int) files.size(); i++)
 	{
 		pos.push_back(sf::Vector2f(windowSize.x / 2 - 250, windowSize.y / 2 - 125 + 50 * i));
 		auto button = std::make_shared<GUI::ExtraButton>(context);
 		button->setPosition(pos[i]);
-		button->setText("Game at " + toString(1900 + dates[i].tm_year) + " - "
-			+ toString(1 + dates[i].tm_mon) + " - "
-			+ toString(dates[i].tm_mday) + " - "
-			+ toString(dates[i].tm_hour) + " - "
-			+ toString(dates[i].tm_min) + " - "
-			+ toString(dates[i].tm_sec));
+		button->setText(files[i]);
 
 		button->setCallback([this, i]()
 			{
